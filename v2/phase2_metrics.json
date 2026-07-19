@@ -1,0 +1,26 @@
+{
+  "term_deposit": {
+    "target_col": "y",
+    "base_rate_pct": 11.7,
+    "auc": 0.806,
+    "brier": 0.0802,
+    "top_decile_lift": 4.49,
+    "top_decile_capture_pct": 44.9
+  },
+  "housing_loan": {
+    "target_col": "housing",
+    "base_rate_pct": 55.6,
+    "auc": 0.866,
+    "brier": 0.1458,
+    "top_decile_lift": 1.69,
+    "top_decile_capture_pct": 16.9
+  },
+  "personal_loan": {
+    "target_col": "loan",
+    "base_rate_pct": 16.0,
+    "auc": 0.713,
+    "brier": 0.1221,
+    "top_decile_lift": 2.63,
+    "top_decile_capture_pct": 26.3
+  }
+}

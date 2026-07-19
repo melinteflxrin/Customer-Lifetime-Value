@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Value & Cross-Sell — PoC Deck</title>
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --line:rgba(255,255,255,0.10); --grid:#2c2c2a; --baseline:#383835;
+    --blue:#3987e5; --green:#008300; --yellow:#c98500; --good:#0ca30c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:var(--bg); color:var(--ink); overflow:hidden;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  .deck{height:100vh; display:flex; align-items:center; justify-content:center;}
+  .slide{
+    display:none; width:min(1120px,92vw); height:min(660px,88vh);
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:52px 60px; position:relative; flex-direction:column;
+  }
+  .slide.active{display:flex;}
+  .kicker{font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--blue); margin-bottom:14px;}
+  h1{font-size:44px; line-height:1.08; margin:0 0 16px; font-weight:700; letter-spacing:-0.02em;}
+  h2{font-size:30px; line-height:1.12; margin:0 0 20px; font-weight:680; letter-spacing:-0.01em;}
+  p.big{font-size:20px; line-height:1.5; color:var(--ink2); margin:0 0 14px; max-width:60ch;}
+  p.sub{font-size:16px; color:var(--muted); margin:0;}
+  .fill{flex:1;}
+  ul.pts{margin:6px 0; padding:0; list-style:none;}
+  ul.pts li{font-size:19px; line-height:1.5; color:var(--ink2); margin:12px 0; padding-left:30px; position:relative;}
+  ul.pts li::before{content:"→"; position:absolute; left:0; color:var(--blue); font-weight:700;}
+  ul.pts li b{color:var(--ink);}
+  .row{display:flex; gap:22px; align-items:center;}
+  .col{flex:1;}
+  .stat{background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:20px 22px;}
+  .stat .n{font-size:40px; font-weight:720; letter-spacing:-0.02em;}
+  .stat .n.blue{color:var(--blue);} .stat .n.green{color:var(--good);}
+  .stat .l{font-size:14px; color:var(--ink2); margin-top:6px;}
+  .statgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .statgrid.two{grid-template-columns:repeat(2,1fr);}
+  .quote{font-size:26px; line-height:1.4; font-weight:600; color:var(--ink); max-width:24ch;}
+  .badge{align-self:flex-start; font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:#ffd479; background:#3a2f10; border:1px solid #5c4a14; padding:4px 10px; border-radius:6px;}
+  .footer{position:absolute; bottom:22px; left:60px; right:60px; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--muted);}
+  .prog{position:fixed; top:0; left:0; height:3px; background:var(--blue); transition:width .2s; z-index:10;}
+  .nav{position:fixed; bottom:16px; right:20px; display:flex; gap:8px; z-index:10;}
+  .nav button{font:inherit; font-size:13px; color:var(--ink2); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:6px 12px; cursor:pointer;}
+  .chip{display:inline-flex; align-items:center; gap:8px; font-size:15px; color:var(--ink2); margin:8px 18px 8px 0;}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
+  table.mini{border-collapse:collapse; width:100%; font-size:17px;}
+  table.mini th,table.mini td{padding:10px 12px; text-align:right; border-bottom:1px solid var(--grid); font-variant-numeric:tabular-nums;}
+  table.mini th:first-child,table.mini td:first-child{text-align:left; font-variant-numeric:normal;}
+  table.mini th{color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.03em; font-weight:600;}
+  table.mini td b{color:var(--ink);}
+  .formula{font-size:22px; background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin:10px 0; font-family:ui-monospace,Menlo,monospace; color:var(--ink);}
+  .formula .hl{color:var(--blue); font-weight:700;}
+  .callout{border-left:3px solid var(--blue); padding-left:18px; margin:14px 0;}
+  .two-list{display:grid; grid-template-columns:1fr 1fr; gap:8px 30px;}
+  .tag-real{color:var(--good); font-weight:600;}
+  .tag-assume{color:var(--yellow); font-weight:600;}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide active">
+    <div class="fill"></div>
+    <div class="kicker">Research &amp; Development · Proof of Concept</div>
+    <h1>Customer Value &amp;<br>Cross-Sell Propensity</h1>
+    <p class="big">Predicting which product a customer will buy next — and turning that into a single, prioritised measure of customer value.</p>
+    <div class="fill"></div>
+    <span class="badge">Demo · illustrative data, not a live bank system</span>
+  </section>
+
+  <!-- 2 THE SHIFT -->
+  <section class="slide">
+    <div class="kicker">The brief</div>
+    <h2>From "who might leave" to "what can we sell"</h2>
+    <div class="row" style="margin-top:10px;">
+      <div class="col">
+        <div class="stat"><div class="l" style="margin:0 0 8px;">Version 1 asked</div>
+          <div class="quote" style="font-size:22px;">"How much do we lose if this customer leaves?"</div>
+          <p class="sub" style="margin-top:12px;">Value = protecting what already exists (churn).</p></div>
+      </div>
+      <div class="col">
+        <div class="stat" style="border-color:var(--blue);"><div class="l" style="margin:0 0 8px;">This version asks</div>
+          <div class="quote" style="font-size:22px;">"Which product can we sell them next — and what's it worth?"</div>
+          <p class="sub" style="margin-top:12px;">Value = future growth potential (cross-sell).</p></div>
+      </div>
+    </div>
+    <p class="big" style="margin-top:22px;">A customer's value becomes: <b style="color:var(--ink)">how likely they are to buy × what each product is worth</b>.</p>
+  </section>
+
+  <!-- 3 PIPELINE -->
+  <section class="slide">
+    <div class="kicker">What we built</div>
+    <h2>A pipeline from raw customers to a ranked sales list</h2>
+    <ul class="pts">
+      <li><b>Score</b> every customer for how likely they are to buy each of three products</li>
+      <li><b>Value</b> each likely sale in money (propensity × product worth)</li>
+      <li><b>Recommend</b> the single best next offer for each customer</li>
+      <li><b>Rank</b> the whole book by cross-sell opportunity — who to call first</li>
+    </ul>
+    <div class="fill"></div>
+    <p class="sub">All of it drives an interactive dashboard and this deck.</p>
+  </section>
+
+  <!-- 4 DATA -->
+  <section class="slide">
+    <div class="kicker">The data</div>
+    <h2>45,211 real bank customers, three products</h2>
+    <p class="big">Public UCI Bank Marketing dataset — real customer attributes and real campaign outcomes.</p>
+    <div class="statgrid" style="margin-top:10px;">
+      <div class="stat"><div class="n blue">Term<br>Deposit</div><div class="l">Real campaign <b>buy / no-buy</b> outcome — our gold-standard signal</div></div>
+      <div class="stat"><div class="n" style="color:var(--good)">Housing<br>Loan</div><div class="l">Current holding — modelled as look-alike propensity</div></div>
+      <div class="stat"><div class="n" style="color:var(--yellow)">Personal<br>Loan</div><div class="l">Current holding — modelled as look-alike propensity</div></div>
+    </div>
+  </section>
+
+  <!-- 5 CORE PROOF: LIFT -->
+  <section class="slide">
+    <div class="kicker">The core proof</div>
+    <h2>We can predict who will buy — far better than random</h2>
+    <div class="row">
+      <div class="col" style="flex:1.15;">
+        <div id="giftChart"></div>
+        <div style="margin-top:6px;">
+          <span class="chip"><span class="dot" style="background:var(--blue)"></span>Our model</span>
+          <span class="chip"><span class="dot" style="background:var(--baseline)"></span>Random dialing</span>
+        </div>
+      </div>
+      <div class="col">
+        <div class="callout">
+          <div class="stat" style="border:none; background:transparent; padding:0;">
+            <div class="n blue" style="font-size:52px;">45%</div>
+            <div class="l" style="font-size:17px;">of <b>all</b> term-deposit buyers reached by calling only the <b>top 10%</b> the model flags</div>
+          </div>
+        </div>
+        <p class="big" style="font-size:18px; margin-top:18px;">Same campaign. <b style="color:var(--ink)">A quarter of the phone calls. Nearly half the sales.</b></p>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:4px;">Term deposit shown — evaluated on customers the model never saw during training.</p>
+  </section>
+
+  <!-- 6 MODELS -->
+  <section class="slide">
+    <div class="kicker">Model performance</div>
+    <h2>Three models, each honestly measured</h2>
+    <table class="mini">
+      <thead><tr><th>Product</th><th>Base rate</th><th>AUC</th><th>Top-decile lift</th><th>Buyers captured (top 10%)</th></tr></thead>
+      <tbody>
+        <tr><td><b>Term deposit</b></td><td>11.7%</td><td><b>0.806</b></td><td><b>4.5×</b></td><td><b>45%</b></td></tr>
+        <tr><td>Housing loan</td><td>55.6%</td><td>0.866</td><td>1.7×</td><td>17%</td></tr>
+        <tr><td>Personal loan</td><td>16.0%</td><td>0.713</td><td>2.6×</td><td>26%</td></tr>
+      </tbody>
+    </table>
+    <ul class="pts" style="margin-top:18px;">
+      <li><b>Term deposit is the star</b> — the one with a real buy/no-buy label and the strongest targeting story</li>
+      <li>Housing loan's low lift is honest, not a bug: <b>55% already hold it</b>, so there's little room to lift above average</li>
+    </ul>
+  </section>
+
+  <!-- 7 PROPENSITY TO MONEY -->
+  <section class="slide">
+    <div class="kicker">From likelihood to value</div>
+    <h2>Turning a probability into money</h2>
+    <div class="formula"><span class="hl">expected value</span> = P(buy) &nbsp;×&nbsp; product value</div>
+    <p class="big">A 20%-likely mortgage can beat a 40%-likely deposit — because the mortgage is worth more. That trade-off is the whole point of a <b style="color:var(--ink)">next-best-offer</b>.</p>
+    <div class="callout" style="margin-top:6px;">
+      <p class="sub" style="font-size:15px;"><span class="tag-assume">Note:</span> product values are made up for this demo and clearly labelled. In a real build they come from the bank's own product economics.</p>
+    </div>
+  </section>
+
+  <!-- 8 NBO MIX -->
+  <section class="slide">
+    <div class="kicker">Next-best-offer</div>
+    <h2>Different customers, different best offer</h2>
+    <div class="row">
+      <div class="col">
+        <div id="nboChart"></div>
+        <p class="sub" style="margin-top:8px;">Which product wins the recommendation, across 45,211 customers.</p>
+      </div>
+      <div class="col">
+        <ul class="pts">
+          <li><b>Term deposit</b> wins for wealthy, high-propensity savers — they top the value ranking</li>
+          <li><b>Housing loan</b> carries the most total value — the high-margin product</li>
+          <li><b>Personal loan</b> is the fallback when a mortgage is already held</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 BOOK OPPORTUNITY -->
+  <section class="slide">
+    <div class="kicker">The prize</div>
+    <h2>A prioritised book of opportunity</h2>
+    <div class="statgrid">
+      <div class="stat"><div class="n green">€20.8M</div><div class="l">total expected cross-sell opportunity across the book</div></div>
+      <div class="stat"><div class="n">€461</div><div class="l">average opportunity per customer (median €182)</div></div>
+      <div class="stat"><div class="n blue">24%</div><div class="l">of all value sits in the top 10% of customers</div></div>
+    </div>
+    <p class="big" style="margin-top:24px;">Concentration means <b style="color:var(--ink)">prioritised targeting pays off</b> — a focused list beats blanket outreach.</p>
+  </section>
+
+  <!-- 10 TARGET LIST -->
+  <section class="slide">
+    <div class="kicker">The output</div>
+    <h2>A sales-ready target list</h2>
+    <p class="big">For every one of 45,211 customers: <b style="color:var(--ink)">who to call, what to offer, and what it's worth</b> — sorted by opportunity.</p>
+    <table class="mini" style="margin-top:6px;">
+      <thead><tr><th>#</th><th>Customer</th><th>Age</th><th>Best offer</th><th>Opportunity</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>C143393</td><td>84</td><td><span style="color:var(--blue);font-weight:600;">Term Deposit</span></td><td><b>€2,004</b></td></tr>
+        <tr><td>2</td><td>C142558</td><td>84</td><td><span style="color:var(--blue);font-weight:600;">Term Deposit</span></td><td><b>€1,929</b></td></tr>
+        <tr><td>3</td><td>C139989</td><td>51</td><td><span style="color:var(--blue);font-weight:600;">Term Deposit</span></td><td><b>€1,778</b></td></tr>
+        <tr><td>6</td><td>C143672</td><td>42</td><td><span style="color:var(--good);font-weight:600;">Housing Loan</span></td><td><b>€1,619</b></td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:12px;">Live, sortable and searchable in the companion dashboard.</p>
+  </section>
+
+  <!-- 11 HONESTY -->
+  <section class="slide">
+    <div class="kicker">Intellectual honesty</div>
+    <h2>What's real vs. what's assumed</h2>
+    <div class="two-list" style="margin-top:6px;">
+      <ul class="pts" style="margin:0;">
+        <li><span class="tag-real">Real:</span> the customers, their attributes, and the term-deposit buy/no-buy outcome</li>
+        <li><span class="tag-real">Real:</span> the models, the lift, and the ranking within each product</li>
+      </ul>
+      <ul class="pts" style="margin:0;">
+        <li><span class="tag-assume">Assumed:</span> the money value of each product (labelled throughout)</li>
+        <li><span class="tag-assume">Assumed:</span> two loans modelled look-alike (no campaign history for them)</li>
+      </ul>
+    </div>
+    <div class="callout" style="margin-top:16px;">
+      <p class="big" style="font-size:18px; margin:0;">We also caught and fixed a real methodology trap: the data is <b style="color:var(--ink)">time-ordered</b>, which silently inverts naive model scores. Naming it is what makes the result trustworthy.</p>
+    </div>
+  </section>
+
+  <!-- 12 RETENTION CALLBACK -->
+  <section class="slide">
+    <div class="kicker">The other half</div>
+    <h2>Retention is already within reach</h2>
+    <p class="big">Full value = <b style="color:var(--ink)">what we can sell them</b> × <b style="color:var(--ink)">how long we keep them</b>. This demo focused on the selling half.</p>
+    <ul class="pts">
+      <li>The <b>keeping half</b> — a churn / retention model — we already built in an earlier prototype</li>
+      <li>This dataset has no churn signal, so we didn't rebuild it here — but the capability is <b>proven and ready to plug in</b></li>
+    </ul>
+    <div class="fill"></div>
+    <p class="sub">Combined, the two halves give a complete forward-looking customer value.</p>
+  </section>
+
+  <!-- 13 PRODUCTION -->
+  <section class="slide">
+    <div class="kicker">If a bank says yes</div>
+    <h2>What a real project would add</h2>
+    <ul class="pts">
+      <li>Real product economics replace the made-up values</li>
+      <li>True campaign history per product replaces look-alike modelling</li>
+      <li>The retention model joins in for full lifetime value</li>
+      <li>Time-aware validation and monitoring baked in from day one</li>
+    </ul>
+    <div class="fill"></div>
+    <p class="sub">The approach is proven here on real data — production is about <b style="color:var(--ink2)">their</b> data, not a new method.</p>
+  </section>
+
+  <!-- 14 CLOSE -->
+  <section class="slide">
+    <div class="fill"></div>
+    <div class="kicker">In one sentence</div>
+    <h1 style="font-size:38px; max-width:24ch;">We can tell a bank <span style="color:var(--blue)">who to approach</span>, <span style="color:var(--good)">with which product</span>, and <span style="color:var(--yellow)">how much it's worth</span>.</h1>
+    <p class="big" style="margin-top:12px;">Proven on 45,000 real customers — ready to point at a bank's own data whenever the project lands.</p>
+    <div class="fill"></div>
+    <p class="sub">Companion: open <b>dashboard.html</b> for the interactive version.</p>
+  </section>
+
+</div>
+<div class="nav">
+  <button id="prev">‹ Prev</button>
+  <span id="counter" style="align-self:center; color:var(--muted); font-size:13px;"></span>
+  <button id="next">Next ›</button>
+</div>
+<script>
+const GAINS = {pct:[0,10,20,30,40,50,60,70,80,90,100], cap:[0,45,64,78,84,89,93,96,98,99.5,100]};
+const NBO = [["Term Deposit",4791,"var(--blue)"],["Housing Loan",20073,"var(--green)"],["Personal Loan",20347,"var(--yellow)"]];
+const SVGNS="http://www.w3.org/2000/svg";
+const E=(t,a={})=>{const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+const cv=n=>getComputedStyle(document.body).getPropertyValue(n).trim();
+
+function gains(){
+  const W=520,H=340,pL=44,pR=14,pT=12,pB=40;
+  const x0=pL,x1=W-pR,y0=H-pB,y1=pT;
+  const sx=v=>x0+(v/100)*(x1-x0), sy=v=>y0+(v/100)*(y1-y0);
+  const s=E("svg",{viewBox:`0 0 ${W} ${H}`,width:W,height:H});
+  for(let t=0;t<=100;t+=25){
+    s.appendChild(E("line",{x1:x0,y1:sy(t),x2:x1,y2:sy(t),stroke:cv("--grid"),"stroke-width":1}));
+    s.appendChild(E("text",{x:x0-8,y:sy(t),"text-anchor":"end","dominant-baseline":"middle",fill:cv("--muted"),"font-size":11})).textContent=t+"%";
+    s.appendChild(E("text",{x:sx(t),y:y0+16,"text-anchor":"middle",fill:cv("--muted"),"font-size":11})).textContent=t+"%";
+  }
+  s.appendChild(E("text",{x:(x0+x1)/2,y:H-4,"text-anchor":"middle",fill:cv("--ink2"),"font-size":12})).textContent="% of customers contacted";
+  s.appendChild(E("line",{x1:sx(0),y1:sy(0),x2:sx(100),y2:sy(100),stroke:cv("--baseline"),"stroke-width":2,"stroke-dasharray":"5 5"}));
+  const pts=GAINS.pct.map((p,i)=>[sx(p),sy(GAINS.cap[i])]);
+  const d="M"+pts.map(p=>p.join(",")).join(" L");
+  s.appendChild(E("path",{d:d+` L${sx(100)},${sy(0)} L${sx(0)},${sy(0)} Z`,fill:cv("--blue"),opacity:0.12}));
+  s.appendChild(E("path",{d,fill:"none",stroke:cv("--blue"),"stroke-width":2.5,"stroke-linejoin":"round"}));
+  pts.forEach((p,i)=>{if(i>0)s.appendChild(E("circle",{cx:p[0],cy:p[1],r:3.5,fill:cv("--blue"),stroke:cv("--surface"),"stroke-width":2}));});
+  document.getElementById("giftChart").appendChild(s);
+}
+function nbo(){
+  const W=500,rowH=54,pL=140,pR=70,H=NBO.length*rowH+8;
+  const max=Math.max(...NBO.map(r=>r[1]))*1.08;
+  const s=E("svg",{viewBox:`0 0 ${W} ${H}`,width:W,height:H});
+  const x0=pL,x1=W-pR;
+  NBO.forEach((r,i)=>{
+    const cy=4+i*rowH;
+    s.appendChild(E("text",{x:pL-10,y:cy+rowH/2,"text-anchor":"end","dominant-baseline":"middle",fill:cv("--ink2"),"font-size":15})).textContent=r[0];
+    const bw=Math.max(2,(r[1]/max)*(x1-x0));
+    s.appendChild(E("rect",{x:x0,y:cy+12,width:bw,height:rowH-28,rx:5,fill:cv(r[2].replace('var(','').replace(')',''))}));
+    s.appendChild(E("text",{x:x0+bw+8,y:cy+rowH/2,"dominant-baseline":"middle",fill:cv("--ink"),"font-size":15,"font-weight":600})).textContent=r[1].toLocaleString("en-US");
+  });
+  document.getElementById("nboChart").appendChild(s);
+}
+gains(); nbo();
+
+/* navigation */
+const slides=[...document.querySelectorAll(".slide")];
+let idx=0;
+function show(n){
+  idx=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,i)=>s.classList.toggle("active",i===idx));
+  document.getElementById("prog").style.width=((idx)/(slides.length-1)*100)+"%";
+  document.getElementById("counter").textContent=(idx+1)+" / "+slides.length;
+}
+document.getElementById("next").onclick=()=>show(idx+1);
+document.getElementById("prev").onclick=()=>show(idx-1);
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){show(idx+1);e.preventDefault();}
+  if(e.key==="ArrowLeft"||e.key==="PageUp"){show(idx-1);e.preventDefault();}
+  if(e.key==="Home")show(0); if(e.key==="End")show(slides.length-1);
+});
+show(0);
+</script>
+</body>
+</html>
