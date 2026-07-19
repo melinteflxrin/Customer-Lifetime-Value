@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CLV Executive Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Bank Portfolio Intelligence</p>
+        <h1>Risk-Adjusted CLV Command Center</h1>
+        <p class="hero-subtitle">A proof-of-concept portfolio view that blends profitability, risk, and retention into one executive lens.</p>
+      </div>
+      <div class="hero-badges">
+        <span class="badge">Updated: June 2, 2026</span>
+        <span class="badge badge-accent">10,000 Customers</span>
+      </div>
+    </header>
+
+    <section class="filter-bar" aria-label="Filters">
+      <div class="filter-group">
+        <label for="filter-gender">Gender</label>
+        <select id="filter-gender"></select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-credit-tier">Credit Tier</label>
+        <select id="filter-credit-tier"></select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-product-segment">Product Segment</label>
+        <select id="filter-product-segment"></select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-age-group">Age Group</label>
+        <select id="filter-age-group"></select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-tenure-group">Tenure Group</label>
+        <select id="filter-tenure-group"></select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-active">Active Member</label>
+        <select id="filter-active">
+          <option value="ALL">All</option>
+          <option value="1">Active</option>
+          <option value="0">Inactive</option>
+        </select>
+      </div>
+    </section>
+
+    <nav class="tab-nav" role="tablist" aria-label="Dashboard tabs">
+      <button class="tab-button active" role="tab" aria-selected="true" data-tab="summary">Executive Summary</button>
+      <button class="tab-button" role="tab" aria-selected="false" data-tab="segmentation">Value &amp; Risk Segmentation</button>
+      <button class="tab-button" role="tab" aria-selected="false" data-tab="drivers">Value Drivers</button>
+      <button class="tab-button" role="tab" aria-selected="false" data-tab="portfolio">Portfolio Deep Dive</button>
+      <button class="tab-button" role="tab" aria-selected="false" data-tab="methodology">Methodology</button>
+    </nav>
+
+    <main>
+      <!-- ── Executive Summary ─────────────────────────────────── -->
+      <section id="tab-summary" class="tab-panel active" role="tabpanel">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <p>Total Risk-Adjusted CLV</p>
+            <h2 id="kpi-total-clv">-</h2>
+            <span id="kpi-total-clv-sub" class="kpi-sub">-</span>
+          </div>
+          <div class="kpi-card">
+            <p>Average CLV</p>
+            <h2 id="kpi-avg-clv">-</h2>
+            <span class="kpi-sub" id="kpi-avg-clv-sub">Per customer</span>
+          </div>
+          <div class="kpi-card">
+            <p>Predicted Churn Rate</p>
+            <h2 id="kpi-churn-rate">-</h2>
+            <span class="kpi-sub" id="kpi-churn-sub">Based on model inference</span>
+          </div>
+          <div class="kpi-card">
+            <p>Negative CLV Accounts</p>
+            <h2 id="kpi-negative-clv">-</h2>
+            <span class="kpi-sub" id="kpi-negative-clv-sub">Needs remediation</span>
+          </div>
+          <div class="kpi-card kpi-card--warning">
+            <p>Value at Risk</p>
+            <h2 id="kpi-var">-</h2>
+            <span class="kpi-sub" id="kpi-var-sub">CLV exposed to churn</span>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Value vs Risk Quadrant</h3>
+              <p>Position customers by CLV and churn probability. Labels show recommended action per zone.</p>
+            </div>
+            <canvas id="chart-quadrant" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Churn Outlook</h3>
+              <p>Share of predicted churners vs loyalists.</p>
+            </div>
+            <canvas id="chart-churn" height="260"></canvas>
+          </div>
+          <div class="card full">
+            <div class="card-header">
+              <h3>CLV Portfolio Tiers</h3>
+              <p>Customer count and share of total portfolio CLV by value tier.</p>
+            </div>
+            <canvas id="chart-tiers" height="120"></canvas>
+          </div>
+          <div class="card full">
+            <div class="card-header">
+              <h3>High-Value, High-Risk Customers</h3>
+              <p>Top 10 accounts with elevated churn risk and CLV — highest retention priority.</p>
+            </div>
+            <div class="table-wrapper">
+              <table id="table-top-risk">
+                <thead>
+                  <tr>
+                    <th>Customer ID</th>
+                    <th>CLV</th>
+                    <th>Churn Probability</th>
+                    <th>Credit Tier</th>
+                    <th>Products</th>
+                    <th>Active</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Methodology ─────────────────────────────────────────── -->
+      <section id="tab-methodology" class="tab-panel" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h3>Methodology &amp; Definitions</h3>
+            <p>Detailed explanation of the dataset, formulas, and dashboard interpretation.</p>
+          </div>
+          <div class="methodology-content">
+            <h4>Purpose</h4>
+            <p>This dashboard is designed to help bank executives move beyond simple churn prediction (who is leaving) to a <strong>value-driven retention strategy</strong> (how much value we lose if they leave). We take raw customer profiles, predict their likelihood of staying with the bank, and project their future financial value over time.</p>
+
+            <h4>1. Revenue and Cost Estimation</h4>
+            <p>To calculate how much a customer is worth, we first need to estimate their annual profitability. Since we are using a proof-of-concept dataset, we engineered realistic financial proxies based on the customer's attributes:</p>
+            <ul>
+              <li><strong>Base Revenue:</strong> An estimate of the income generated by the customer, derived primarily from their account balance and partially from their salary. <br><em>Formula: 0.04 * Balance + 0.005 * Estimated_Salary</em></li>
+              <li><strong>Funds Transfer Pricing (FTP) Cost:</strong> The internal cost of funds for the bank, estimated as a percentage (20&ndash;30%) of the base revenue.</li>
+              <li><strong>Allocated Cost:</strong> Fixed and variable costs associated with serving the customer, which increase with the number of products they hold and whether they are an active member.</li>
+              <li><strong>Net Operating Margin:</strong> The raw annual profit before considering any risks. <br><em>Formula: Base_Revenue &minus; FTP_Cost &minus; Allocated_Cost</em></li>
+            </ul>
+
+            <h4>2. Adjusting for Credit Risk (PD)</h4>
+            <p>A customer's value must account for the risk that they might default on their obligations. We use the customer's credit score to estimate a <strong>Probability of Default (PD) Risk</strong>.</p>
+            <p><em>Formula: (850 &minus; Credit_Score) / 2500</em> (capped between 0.5% and 25%).</p>
+            <p>We then reduce the operating margin by this risk to get the <strong>Risk-Adjusted Margin</strong>, which is the true expected annual cash flow from the customer.</p>
+
+            <h4>3. Predicting Survival and Churn</h4>
+            <p>A machine learning model predicts whether a customer will churn (leave) or stay. However, a binary "yes/no" isn't enough for financial projections. We convert the model's prediction and confidence into a continuous <strong>Survival Probability</strong>:</p>
+            <ul>
+              <li>If the model predicts the customer will <strong>leave</strong> (PredictedValue = 1), their chance of staying is <em>1 &minus; Confidence</em>.</li>
+              <li>If the model predicts the customer will <strong>stay</strong> (PredictedValue = 0), their chance of staying is simply the <em>Confidence</em>.</li>
+            </ul>
+            <p>The <strong>Churn Probability</strong> is the exact opposite (1 &minus; Survival).</p>
+
+            <h4>4. Multi-Year Customer Lifetime Value (CLV)</h4>
+            <p>Customer value isn't just about this year's profit; it's about all future years they remain with the bank. We project the <strong>Risk-Adjusted Margin</strong> over a <strong>5-year horizon</strong>.</p>
+            <p>Because money in the future is worth less than money today, we discount future cash flows using a <strong>10% cost of capital (Discount Rate)</strong>. We also assume the customer's survival probability applies to each subsequent year.</p>
+            <div style="background: rgba(28,27,26,0.03); padding: 12px 16px; border-radius: 8px; margin: 12px 0;">
+              <strong>Final CLV Formula (Discounted Cash Flow):</strong><br>
+              <em style="font-size: 1.05rem;">CLV = Risk_Adjusted_Margin &times; &Sigma;<sub>t=1</sub><sup>5</sup> (Survival<sup>t</sup> / 1.10<sup>t</sup>)</em>
+            </div>
+
+            <h4>Key Dashboard Metrics</h4>
+            <ul>
+              <li><strong>Value at Risk:</strong> The total CLV that the bank expects to lose based on current churn probabilities. It answers the question: <em>"How much portfolio value is exposed to churn?"</em></li>
+              <li><strong>Revenue Concentration (Pareto):</strong> A visual demonstration of how a small percentage of top customers often drives the majority of the portfolio's total value.</li>
+              <li><strong>Value vs. Risk Quadrant:</strong> A strategic tool mapping customers by their CLV and Churn Probability to recommend actions like "Protect &amp; Grow" (high value, low risk) or "Intervene Now" (high value, high risk).</li>
+            </ul>
+
+            <h4>Notes &amp; Caveats</h4>
+            <ul>
+              <li>Revenue, costs, and PD risk are engineered proxies for this proof-of-concept. In a production environment, these should be replaced with actual financial ledger and credit risk data.</li>
+              <li>The 5-year horizon and 10% discount rate are standard business assumptions that can be adjusted to match your institution's specific planning cycle and hurdle rates.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Value & Risk Segmentation ──────────────────────────── -->
+      <section id="tab-segmentation" class="tab-panel" role="tabpanel">
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>CLV by Age Group</h3>
+              <p>Average risk-adjusted CLV per lifecycle stage.</p>
+            </div>
+            <canvas id="chart-age" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>CLV by Tenure Group</h3>
+              <p>Relationship depth vs value.</p>
+            </div>
+            <canvas id="chart-tenure" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>CLV by Credit Tier</h3>
+              <p>Credit profile impact on portfolio value.</p>
+            </div>
+            <canvas id="chart-credit" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>CLV by Product Segment</h3>
+              <p>Product mix and profitability.</p>
+            </div>
+            <canvas id="chart-product" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Active vs Inactive Members</h3>
+              <p>Average CLV and churn rate by engagement status.</p>
+            </div>
+            <canvas id="chart-active-comparison" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Gender Comparison</h3>
+              <p>Average CLV and churn rate by gender.</p>
+            </div>
+            <canvas id="chart-gender-comparison" height="260"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Value Drivers ──────────────────────────────────────── -->
+      <section id="tab-drivers" class="tab-panel" role="tabpanel">
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Value Bridge</h3>
+              <p>Average value flow from revenue to risk-adjusted CLV.</p>
+            </div>
+            <canvas id="chart-waterfall" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Behavioral Health Snapshot</h3>
+              <p>Health score distribution for filtered customers.</p>
+            </div>
+            <canvas id="chart-health" height="260"></canvas>
+          </div>
+          <div class="card full">
+            <div class="card-header">
+              <h3>Key Drivers Overview</h3>
+              <p>High-level correlations between CLV and primary factors.</p>
+            </div>
+            <canvas id="chart-drivers" height="140"></canvas>
+          </div>
+          <div class="card full">
+            <div class="card-header">
+              <h3>5-Year CLV Projection by Year</h3>
+              <p>Expected average CLV contribution per year. Declining bars show how retention decay erodes future value.</p>
+            </div>
+            <canvas id="chart-yearly" height="180"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Portfolio Deep Dive ─────────────────────────────────── -->
+      <section id="tab-portfolio" class="tab-panel" role="tabpanel">
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>CLV Distribution</h3>
+              <p>Spread of portfolio value for filtered segment.</p>
+            </div>
+            <canvas id="chart-distribution" height="260"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Segment Mix</h3>
+              <p>Portfolio composition by product segment.</p>
+            </div>
+            <canvas id="chart-segment-mix" height="260"></canvas>
+          </div>
+          <div class="card full">
+            <div class="card-header">
+              <h3>Revenue Concentration (Pareto)</h3>
+              <p>Cumulative % of total CLV generated by the top X% of customers, ranked high to low. The steeper the curve, the more concentrated portfolio value is.</p>
+            </div>
+            <canvas id="chart-pareto" height="200"></canvas>
+          </div>
+          <div class="card full">
+            <div class="card-header">
+              <h3>Customer Explorer</h3>
+              <p>Click column headers to sort. Search by Customer ID. Showing up to 100 rows.</p>
+            </div>
+            <div class="table-toolbar">
+              <input type="text" id="search-portfolio" class="search-box" placeholder="&#128269; Search by Customer ID&hellip;" />
+              <span id="portfolio-count" class="table-count"></span>
+            </div>
+            <div class="table-wrapper">
+              <table id="table-portfolio">
+                <thead>
+                  <tr>
+                    <th data-sort="CUSTOMER_ID">Customer ID</th>
+                    <th data-sort="Risk_Adjusted_CLV">CLV &#8597;</th>
+                    <th data-sort="Churn_Probability">Churn Prob. &#8597;</th>
+                    <th data-sort="BALANCE">Balance &#8597;</th>
+                    <th data-sort="CREDIT_TIER">Credit Tier</th>
+                    <th data-sort="TENURE">Tenure &#8597;</th>
+                    <th data-sort="PRODUCTS_NUMBER">Products &#8597;</th>
+                    <th>Active</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        <h4>Methodology Notes</h4>
+        <p>Risk-adjusted CLV uses a <strong>5-year discounted cash flow</strong> with a <strong>10% discount rate</strong>. Formula: <em>Risk_Adjusted_Margin &times; &Sigma;<sub>t=1</sub><sup>5</sup> (Survival<sup>t</sup> / 1.1<sup>t</sup>)</em>. Risk_Adjusted_Margin = (Base_Revenue &minus; FTP_Cost &minus; Allocated_Cost) &times; (1 &minus; PD_Risk). Survival uses the project logic: when PredictedValue = 1, S = 1 &minus; Confidence; when PredictedValue = 0, S = Confidence.</p>
+      </div>
+      <div>
+        <h4>Proof-of-Concept</h4>
+        <p>Designed for executive storytelling and portfolio prioritization. Drilldowns surface value-at-risk segments for targeted retention plays.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="dashboard_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
